@@ -7,7 +7,11 @@ namespace Puzzle1
 inductive TurnDirection where
   | left
   | right
+def TurnDirection.repr:= (match · with
+  | left => "left"
+  | right => "right")
 open TurnDirection
+
 
 abbrev DialPos : Type := Fin 100 -- { n : Nat // n < 100 }
 def DialPos.initial : DialPos := 50
@@ -25,7 +29,7 @@ def DialPos.inDirection (n : Nat) (dir : TurnDirection) : DialPos := (match dir 
 
 structure Turn where
   dir : TurnDirection
-  count : DialPos
+  count : Nat
 
 infix:arg "in" => inDirection
 infix:arg "turn" => add
@@ -39,28 +43,42 @@ def reduce (turns : List Turn) (safe : DialState): IO DialState := do
       match turns with
       | [] => pure safe
       | step :: steps =>
-        let turnedDial := safe.dial turn (step.count in step.dir)
+        let fullTurns := step.count / 100
+        let remaining := ofNat step.count
+        IO.println s!"s.c: {step.count}"
+
+        let remainPassesZero: Nat := match step.dir with
+        | left => if remaining <= safe.dial then 1 else 0
+        | right => if (remaining : Nat) + (safe.dial : Nat) >= 100 then 1 else 0
+
+        let turnedDial := safe.dial turn (remaining in step.dir)
+        IO.println s!"Turning {step.count} (simp {remaining}) in {repr step.dir}. Adding {remaining in step.dir} to {safe.dial} = {turnedDial}"
+        let newZeroes := fullTurns + remainPassesZero
+        IO.println s!"let newZeroes := {fullTurns} + {remainPassesZero} = {fullTurns + remainPassesZero}"
+
+        --TODO: check if the turn caused a full rotation
         -- IO.println ("After turn: " ++ (Nat.repr turnedDial))
-        let isNowZero := if turnedDial = 0 then 1 else 0
-        reduce steps {dial := turnedDial, zeroes := safe.zeroes + isNowZero}
+        -- let isNowZero := if turnedDial = 0 then 1 else 0
+        reduce steps {dial := turnedDial, zeroes := safe.zeroes + newZeroes}
 
 
 def puzzle1 : IO Unit := do
-  let file ← fileStream "inputs/1.txt"
+  let file ← fileStream "inputs/1test.txt"
   let out ← IO.getStdout
   match file with
   | none => pure ()
   | some s =>
     let lines ← s.lines
-    let mapper (s : String) : Turn :={
+    let parseLine (s : String) : Turn := {
       dir := if (String.startValidPos s).get! = 'L' then left else right,
-      count := ofNat (String.toNat! (s.toSlice.drop 1).copy)
+      count := String.toNat! (s.toSlice.drop 1).copy
     }
 
-    let turns := (lines.map mapper).toList
-
+    let turns := (lines.map parseLine).toList
 
     let finalDial ← reduce turns {dial := initial, zeroes := 0}
     out.putStrLn (Nat.repr finalDial.zeroes)
 #eval puzzle1
+-- 3836 too low
+-- 5839 too high
 end Puzzle1
