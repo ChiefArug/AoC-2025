@@ -1,7 +1,7 @@
 import AoC2025
-import AoC2025.Puzzle1
+import AoC2025.Puzzle2
 
 def main : IO Unit := do
   let out ← IO.getStdout
   out.putStrLn "Hello World"
-  Puzzle1.puzzle1
+  Puzzle2.puzzle2

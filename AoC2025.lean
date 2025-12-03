@@ -1,4 +1,4 @@
 -- This module serves as the root of the `AoC` library.
 -- Import modules here that should be built as part of the library.
 import AoC2025.Basic
-import AoC2025.Puzzle1
+import AoC2025.Puzzle2
