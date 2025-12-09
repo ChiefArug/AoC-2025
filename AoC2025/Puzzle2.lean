@@ -28,14 +28,6 @@ def Range.expand (r : Range): List Nat :=
 -- this is insane
 def natlog10Floor (n : Nat): Nat := (Float.ofNat n).log10.toInt64.toInt.natAbs
 
-def List.unwrapIO {α : Type} (list : List (IO α)): IO (List α) := do
-  match list with
-  | [] => pure []
-  | e :: es =>
-    let elem ← e
-    let rest ← unwrapIO es
-    pure (elem :: rest)
-
 def reduce (ranges : List Range) (previousSum : Nat): IO Nat := do
   match ranges with
   | [] => pure previousSum
