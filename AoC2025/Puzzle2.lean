@@ -41,35 +41,24 @@ def reduce (ranges : List Range) (previousSum : Nat): IO Nat := do
   | [] => pure previousSum
   | range :: rest =>
     IO.println (Nat.repr range.first ++ " to " ++ Nat.repr range.last)
-    let expanded := Range.expand range
-    --IO.print "expanded"
-    --IO.println expanded
-    -- the length is 1 + the floor of log10 of the number
-    let withLength : List NatWithLength := expanded.map (λ x => {n := x, length := 1 + natlog10Floor x})
-    -- filter out the numbers that are even length
-    let onlyEvens := withLength.filter (·.length % 2 = 0)
-    --IO.print "only evens "
-    --IO.println (onlyEvens.map NatWithLength.n)
-    let onlyMistakes := onlyEvens.filter (λ x =>
+    let onlyMistakes := range.expand.filter (λ x =>
       -- example with {n := 514514, length := 6}
+      let length := natlog10Floor x
 
       -- segmentSize := 3
-      let segmentSize := x.length / 2
+      let segmentSize := length / 2
       -- segmentShifter := 1000
       let segmentShifter := 10 ^ segmentSize
       -- lastHalf := 514
-      let lastHalf := x.n % segmentShifter
+      let lastHalf := x % segmentShifter
       -- firstHalf := 514000
       let firstHalf := lastHalf * segmentShifter
       -- expected := 514514
       let expected := firstHalf + lastHalf
       -- 514514 = 514514
-      x.n = expected
+      x = expected
     )
-    let backToNats := onlyMistakes.map NatWithLength.n
-    IO.print "backToNats "
-    IO.println backToNats
-    let currentSum := backToNats.sum
+    let currentSum := onlyMistakes.sum
     let totalSoFar := previousSum + currentSum
 
     reduce rest totalSoFar
