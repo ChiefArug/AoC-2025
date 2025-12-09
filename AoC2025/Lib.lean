@@ -20,4 +20,6 @@ def unwrapIO {α : Type} (list : List (IO α)): IO (List α) := do
     pure (elem :: rest)
 
 
+def listFromProd {α : Type} (prod : α × α) : List α := prod.fst :: prod.snd :: []
+
 end Lib
