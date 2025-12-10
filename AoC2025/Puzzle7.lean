@@ -2,6 +2,26 @@ import AoC2025.Lib
 import Lean
 open Lib Option
 
+def Nat.charred (n : Nat) : Char := match n with
+  | 0 => '0'
+  | 1 => '1'
+  | 2 => '2'
+  | 3 => '3'
+  | 4 => '4'
+  | 5 => '5'
+  | 6 => '6'
+  | 7 => '7'
+  | 8 => '8'
+  | 9 => '9'
+  | o =>
+    let o := o - 10
+    if o < 25 then Char.ofNat ('a'.toNat + o)
+    else
+    let o := o - 26
+    if o < 25 then Char.ofNat ('A'.toNat + o)
+    else '*'
+
+
 namespace Puzzle7
 
 def puzzle7 : IO Unit := do
@@ -14,10 +34,9 @@ def puzzle7 : IO Unit := do
     let lines := lines.toList
     let entrance := lines[0]!
     let mut remaining := lines.drop 1
-    let mut beamPresent := Vector.replicate entrance.length false
-    beamPresent := beamPresent.set! (entrance.find (· = 'S')).byteIdx true
+    let mut beamPresent := Vector.replicate entrance.length 0
+    beamPresent := beamPresent.set! (entrance.find (· = 'S')).byteIdx 1
     let mut splits := 0
-    let mut timelines := 0
 
 
     while hr : !remaining.isEmpty do
@@ -26,18 +45,16 @@ def puzzle7 : IO Unit := do
       let mut nextBeams := beamPresent
       for hi : i in Vector.range beamPresent.size do
         have hi := inRange_ltMax hi
-        if beamPresent[i] && line[i]! = '^' then do
+        if beamPresent[i] != 0 && line[i]! = '^' then do
           if h : i > 0 then do
-            if beamPresent[i - 1] || nextBeams[i - 1] then timelines := timelines - 1
-            nextBeams := nextBeams.set (i - 1) true
+            nextBeams := nextBeams.set (i - 1) (nextBeams[i - 1] + beamPresent[i])
           if h : i + 1 < nextBeams.size then do
-            if nextBeams[i + 1] || nextBeams[i + 1] then timelines := timelines - 1
-            nextBeams := nextBeams.set (i + 1) true
-          nextBeams := nextBeams.set i false
+            nextBeams := nextBeams.set (i + 1) (nextBeams[i + 1] + beamPresent[i])
+          nextBeams := nextBeams.set i 0
           splits := splits + 1
-          timelines := timelines + 1
       beamPresent := nextBeams
-      IO.println (String.ofList (beamPresent.toList.map (if · then '|' else '.')))
+      IO.println (String.ofList (beamPresent.toList.map λ x => (if x > 0 then x.charred else '.')))
+    let timelines := beamPresent.sum
     IO.println s!"splits {splits} timelines {timelines}"
 
 -- p2 3097 too low
