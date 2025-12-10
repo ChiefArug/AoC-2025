@@ -26,9 +26,6 @@ def Space.isPaper := (match · with | paper => true | empty => false)
 
 instance : ToString Space where toString := (λ x : Space => if x.isPaper then "paper" else "empty")
 
-def inRange_ltMax {n a : Nat} (inp : a ∈ Vector.range n) : a < n := by
-  grind
-
 def puzzle4 : IO Unit := do
   let file ← (fileStream "inputs/4.txt")
   match file.map IO.FS.Stream.lines with

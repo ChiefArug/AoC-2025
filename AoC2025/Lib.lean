@@ -22,4 +22,7 @@ def unwrapIO {α : Type} (list : List (IO α)): IO (List α) := do
 
 def listFromProd {α : Type} (prod : α × α) : List α := prod.fst :: prod.snd :: []
 
+def inRange_ltMax {n a : Nat} (inp : a ∈ Vector.range n) : a < n := by
+  grind
+
 end Lib
