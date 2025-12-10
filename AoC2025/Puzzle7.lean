@@ -17,6 +17,7 @@ def puzzle7 : IO Unit := do
     let mut beamPresent := Vector.replicate entrance.length false
     beamPresent := beamPresent.set! (entrance.find (· = 'S')).byteIdx true
     let mut splits := 0
+    let mut timelines := 0
 
 
     while hr : !remaining.isEmpty do
@@ -26,12 +27,19 @@ def puzzle7 : IO Unit := do
       for hi : i in Vector.range beamPresent.size do
         have hi := inRange_ltMax hi
         if beamPresent[i] && line[i]! = '^' then do
-          if h : i > 0 then nextBeams := nextBeams.set (i - 1) true
-          if h : i + 1 < nextBeams.size then do nextBeams := nextBeams.set (i + 1) true
+          if h : i > 0 then do
+            if beamPresent[i - 1] || nextBeams[i - 1] then timelines := timelines - 1
+            nextBeams := nextBeams.set (i - 1) true
+          if h : i + 1 < nextBeams.size then do
+            if nextBeams[i + 1] || nextBeams[i + 1] then timelines := timelines - 1
+            nextBeams := nextBeams.set (i + 1) true
           nextBeams := nextBeams.set i false
           splits := splits + 1
+          timelines := timelines + 1
       beamPresent := nextBeams
-    IO.println splits
+      IO.println (String.ofList (beamPresent.toList.map (if · then '|' else '.')))
+    IO.println s!"splits {splits} timelines {timelines}"
 
+-- p2 3097 too low
 #eval puzzle7
 end Puzzle7
