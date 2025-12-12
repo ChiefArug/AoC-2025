@@ -40,5 +40,5 @@ def puzzle11 : IO Unit := do
     let t ← (loop map false false "svr" {})
     IO.println t.fst
 
-#time #eval puzzle11
+#eval timeit "puzzle 11: " puzzle11
 end Puzzle11
